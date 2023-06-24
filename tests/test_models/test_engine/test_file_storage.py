@@ -131,3 +131,5 @@ class TestFileStorage(unittest.TestCase):
         storage.new(obj)
         storage.save()
         self.assertIsNotNone(storage.get("Amenity", obj_id))
+
+        
