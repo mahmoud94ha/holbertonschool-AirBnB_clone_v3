@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 from flask import Flask
 from models import storage
