@@ -73,7 +73,8 @@ class FileStorage:
         self.reload()
 
     def get(self, cls, id):
-        """Returns the object based on the class and its ID, or None if not found"""
+        """Returns the object based on the class and its ID,
+        or None if not found"""
         key = cls.__name__ + '.' + id
         return self.__objects.get(key)
 
@@ -84,6 +85,5 @@ class FileStorage:
         if cls is None:
             return len(self.__objects)
         else:
-            return sum(1 for obj in self.__objects.values() if isinstance(obj, cls))
-
-    
+            return sum(1 for obj in self.__objects.values()
+                       if isinstance(obj, cls))
