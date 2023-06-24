@@ -5,7 +5,7 @@ Contains the api app.py
 import os
 from flask import Flask, jsonify
 from models import storage
-from api import app_views
+from api.v1.views import app_views
 
 app = Flask(__name__)
 
