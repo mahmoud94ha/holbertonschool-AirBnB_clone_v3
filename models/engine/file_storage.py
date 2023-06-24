@@ -11,9 +11,12 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+import unittest
+from models.engine import db_storage
 
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
+DBStorage = db_storage.DBStorage
 
 
 class FileStorage:
@@ -82,3 +85,21 @@ class FileStorage:
             return len(self.__objects)
         else:
             return sum(1 for obj in self.__objects.values() if isinstance(obj, cls))
+
+    @unittest.skipIf(db_storage.DBStorage != 'db', "not testing db storage")
+    def test_all_no_class(self):
+        """Test that all returns all rows when no class is passed"""
+        storage = DBStorage()
+        objects = storage.all()
+        self.assertIsInstance(objects, dict)
+        self.assertEqual(len(objects), 6)
+
+    @unittest.skipIf(db_storage.DBStorage != 'db', "not testing db storage")
+    def test_new(self):
+        """Test that new adds an object to the database"""
+        storage = DBStorage()
+        obj = classes["Amenity"]()
+        obj_id = obj.id
+        storage.new(obj)
+        storage.save()
+        self.assertIsNotNone(storage.get("Amenity", obj_id))

@@ -113,3 +113,21 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    @unittest.skipIf(file_storage.FileStorage == 'db', "not testing file storage")
+    def test_all_no_class(self):
+        """Test that all returns all rows when no class is passed"""
+        storage = FileStorage()
+        objects = storage.all()
+        self.assertIsInstance(objects, dict)
+        self.assertEqual(len(objects), 7)
+
+    @unittest.skipIf(file_storage.FileStorage == 'db', "not testing file storage")
+    def test_new(self):
+        """Test that new adds an object to the FileStorage.__objects attr"""
+        storage = FileStorage()
+        obj = classes["Amenity"]()
+        obj_id = obj.id
+        storage.new(obj)
+        storage.save()
+        self.assertIsNotNone(storage.get("Amenity", obj_id))
