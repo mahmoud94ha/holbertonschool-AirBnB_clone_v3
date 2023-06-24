@@ -13,7 +13,13 @@ stype = environ.get('HBNB_TYPE_STORAGE')
                  methods=['GET'])
 def amenities_per_place(place_id=None):
     """amenities_per_place"""
-    place = storage.get('Place', place_id)
+
+    try:
+        place = storage.get('Place', place_id)
+    except AttributeError:
+        place = None
+    if place is None:
+        abort(404, 'Not found')
 
     if request.method == 'GET':
         if place is None:
@@ -36,7 +42,14 @@ def amenities_per_place(place_id=None):
                  methods=['DELETE', 'POST'])
 def amenity_to_place(place_id=None, amenity_id=None):
     """amenity_to_place"""
-    place = storage.get('Place', place_id)
+
+    try:
+        place = storage.get('Place', place_id)
+    except AttributeError:
+        place = None
+    if place is None:
+        abort(404, 'Not found')
+
     amenity_obj = storage.get('Amenity', amenity_id)
     if place is None:
         abort(404, 'Not found')
