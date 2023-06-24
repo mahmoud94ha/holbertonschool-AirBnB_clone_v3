@@ -9,78 +9,50 @@ from api.v1.views import app_views, storage
 
 @app_views.route("/places/<place_id>/amenities", methods=["GET"],
                  strict_slashes=False)
-def amenity_by_place(place_id):
-    """amenity_by_place"""
-    fetched_obj = storage.get("Place", str(place_id))
+def get_place_amenities(place_id):
+    """Retrieves the list of all Amenity objects of a Place"""
+    place = storage.get("Place", place_id)
 
-    all_amenities = []
-
-    if fetched_obj is None:
+    if place is None:
         abort(404)
 
-    for obj in fetched_obj.amenities:
-        all_amenities.append(obj.to_json())
-
-    return jsonify(all_amenities)
+    amenities = [amenity.to_dict() for amenity in place.amenities]
+    return jsonify(amenities)
 
 
 @app_views.route("/places/<place_id>/amenities/<amenity_id>",
                  methods=["DELETE"], strict_slashes=False)
 def unlink_amenity_from_place(place_id, amenity_id):
-    """unlink_amenity_from_place"""
-    if not storage.get("Place", str(place_id)):
-        abort(404)
-    if not storage.get("Amenity", str(amenity_id)):
+    """Deletes an Amenity object from a Place"""
+    place = storage.get("Place", place_id)
+    amenity = storage.get("Amenity", amenity_id)
+
+    if place is None or amenity is None:
         abort(404)
 
-    fetched_obj = storage.get("Place", place_id)
-    found = 0
-
-    for obj in fetched_obj.amenities:
-        if str(obj.id) == amenity_id:
-            if getenv("HBNB_TYPE_STORAGE") == "db":
-                fetched_obj.amenities.remove(obj)
-            else:
-                fetched_obj.amenity_ids.remove(obj.id)
-            fetched_obj.save()
-            found = 1
-            break
-
-    if found == 0:
+    if amenity not in place.amenities:
         abort(404)
-    else:
-        resp = jsonify({})
-        resp.status_code = 201
-        return resp
+
+    place.amenities.remove(amenity)
+    storage.save()
+
+    return jsonify({}), 200
 
 
 @app_views.route("/places/<place_id>/amenities/<amenity_id>",
                  methods=["POST"], strict_slashes=False)
 def link_amenity_to_place(place_id, amenity_id):
-    """link_amenity_to_place"""
-    fetched_obj = storage.get("Place", str(place_id))
-    amenity_obj = storage.get("Amenity", str(amenity_id))
-    found_amenity = None
+    """Links an Amenity object to a Place"""
+    place = storage.get("Place", place_id)
+    amenity = storage.get("Amenity", amenity_id)
 
-    if not fetched_obj or not amenity_obj:
+    if place is None or amenity is None:
         abort(404)
 
-    for obj in fetched_obj.amenities:
-        if str(obj.id) == amenity_id:
-            found_amenity = obj
-            break
+    if amenity in place.amenities:
+        return jsonify(amenity.to_dict()), 200
 
-    if found_amenity is not None:
-        return jsonify(found_amenity.to_json())
+    place.amenities.append(amenity)
+    storage.save()
 
-    if getenv("HBNB_TYPE_STORAGE") == "db":
-        fetched_obj.amenities.append(amenity_obj)
-    else:
-        fetched_obj.amenities = amenity_obj
-
-    fetched_obj.save()
-
-    response = jsonify(amenity_obj.to_json())
-    response.status_code = 201
-
-    return response
+    return jsonify(amenity.to_dict()), 201
