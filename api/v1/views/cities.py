@@ -2,7 +2,7 @@
 """
 Contains the api app.py
 """
-from flask import jsonify, abort, request
+from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage
 from models.city import City
