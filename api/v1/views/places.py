@@ -86,7 +86,7 @@ def update_place(place_id):
 
     for key, value in place_data.items():
         list = ["id", "state_id", "city_id",
-                       "created_at", "updated_at"]
+                "created_at", "updated_at"]
         if key not in list:
             setattr(place, key, value)
     storage.save()
