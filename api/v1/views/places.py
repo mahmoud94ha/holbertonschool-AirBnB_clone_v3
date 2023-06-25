@@ -94,30 +94,41 @@ def update_place(place_id):
     return jsonify(place.to_dict()), 200
 
 
-@app_views.route("/places_search", methods=['POST'],
+@app_views.route("/places_search", methods=["POST"],
                  strict_slashes=False)
-def place_search():
-    """Retrieves all Place objects depending of the JSON"""
-    list_obj = []
-    obj_request = request.get_json()
-    if obj_request:
-        if "states" in obj_request and len(obj_request["states"]) > 0:
-            list_states = obj_request["states"]
-            for state_id in list_states:
-                state = storage.get("State", state_id)
-                if state:
-                    list_cities = state.cities
-                    for city in list_cities:
-                        list_places = city.places
-                        for place in list_places:
-                            list_obj.append(place.to_dict())
+def places_search():
+    """places_search"""
+    search_data = request.get_json()
+    if not search_data:
+        abort(400, "Not a JSON")
 
-        if "cities" in obj_request and len(obj_request["cities"]) > 0:
-            list_cities = obj_request["cities"]
-            for city_id in list_cities:
-                city = storage.get("City", city_id)
+    states = search_data.get("states", [])
+    cities = search_data.get("cities", [])
+    amenities = search_data.get("amenities", [])
+
+    places = storage.all(Place).values()
+
+    if states or cities:
+        filtered_places = []
+        if states:
+            for state_id in states:
+                state = storage.get(State, state_id)
+                if state:
+                    filtered_places.extend(state.places)
+        if cities:
+            for city_id in cities:
+                city = storage.get(City, city_id)
                 if city:
-                    list_places = city.places
-                    for place in list_places:
-                        list_obj.append(place.to_dict())
-        return jsonify(list_obj)
+                    filtered_places.extend(city.places)
+
+        places = set(places).intersection(filtered_places)
+
+    if amenities:
+        filtered_places = []
+        for place in places:
+            if all(amenity_id in place.amenities for amenity_id in amenities):
+                filtered_places.append(place)
+        places = filtered_places
+
+    places_list = [place.to_dict() for place in places]
+    return jsonify(places_list)
