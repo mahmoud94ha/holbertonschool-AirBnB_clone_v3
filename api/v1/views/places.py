@@ -1,3 +1,7 @@
+ #!/usr/bin/python3
+"""
+Contains the api app.py
+"""
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage
@@ -10,6 +14,7 @@ from models.state import State
 @app_views.route("/cities/<city_id>/places", methods=["GET"],
                  strict_slashes=False)
 def retrieves_all_places(city_id):
+    """Retrieves the list of all Place objects of a City"""
     city = storage.get(City, city_id)
     if not city:
         abort(404)
@@ -23,6 +28,7 @@ def retrieves_all_places(city_id):
 @app_views.route("/places/<place_id>", methods=["GET"],
                  strict_slashes=False)
 def get_place(place_id):
+    """Retrieves a Place object"""
     place = storage.get(Place, place_id)
     if not place:
         abort(404)
@@ -32,6 +38,7 @@ def get_place(place_id):
 @app_views.route("/places/<place_id>", methods=["DELETE"],
                  strict_slashes=False)
 def delete_place(place_id):
+    """Deletes a Place object"""
     place = storage.get(Place, place_id)
     if not place:
         abort(404)
@@ -43,6 +50,7 @@ def delete_place(place_id):
 @app_views.route("/cities/<city_id>/places", methods=["POST"],
                  strict_slashes=False)
 def create_place(city_id):
+    """Creates a Place"""
     place_data = request.get_json()
     if not place_data:
         abort(400, "Not a JSON")
@@ -69,6 +77,7 @@ def create_place(city_id):
 @app_views.route("/places/<place_id>", methods=["PUT"],
                  strict_slashes=False)
 def update_place(place_id):
+    """Updates a Place object"""
     place_data = request.get_json()
     place = storage.get(Place, place_id)
     if not place:
@@ -77,7 +86,8 @@ def update_place(place_id):
         abort(400, "Not a JSON")
 
     for key, value in place_data.items():
-        ignored_keys = ["id", "state_id", "city_id", "created_at", "updated_at"]
+        ignored_keys = ["id", "state_id", "city_id",
+                        "created_at", "updated_at"]
         if key not in ignored_keys:
             setattr(place, key, value)
     storage.save()
@@ -87,6 +97,7 @@ def update_place(place_id):
 @app_views.route("/places_search", methods=["POST"],
                  strict_slashes=False)
 def places_search():
+    """Retrieves all Place objects depending of the JSON"""
     place_data = request.get_json()
     if not place_data:
         abort(400, "Not a JSON")
