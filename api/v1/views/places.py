@@ -109,19 +109,19 @@ def places_search():
     places = storage.all(Place).values()
 
     if states or cities:
-        filtered_places = []
+        filtered_places = set()
         if states:
             for state_id in states:
                 state = storage.get(State, state_id)
                 if state:
-                    filtered_places.extend(state.places)
+                    filtered_places.update(state.places)
         if cities:
             for city_id in cities:
                 city = storage.get(City, city_id)
                 if city:
-                    filtered_places.extend(city.places)
+                    filtered_places.update(city.places)
 
-        places = set(places).intersection(filtered_places)
+        places = filtered_places
 
     if amenities:
         filtered_places = []
