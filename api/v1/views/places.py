@@ -94,42 +94,30 @@ def update_place(place_id):
     return jsonify(place.to_dict()), 200
 
 
-@app_views.route("/places_search", methods=["POST"],
+@app_views.route("/places_search", methods=['POST'],
                  strict_slashes=False)
-def places_search():
+def place_search():
     """Retrieves all Place objects depending of the JSON"""
-    place_data = request.get_json()
-    if not place_data:
-        abort(400, "Not a JSON")
-
-    states = place_data.get("states", [])
-    cities = place_data.get("cities", [])
-    amenities = place_data.get("amenities", [])
-
-    if not states and not cities and not amenities:
-        places = storage.all(Place).values()
-    else:
-        places = set()
-
-        if states:
-            for state_id in states:
-                state = storage.get(State, state_id)
+    list_obj = []
+    obj_request = request.get_json()
+    if obj_request:
+        if "states" in obj_request and len(obj_request["states"]) > 0:
+            list_states = obj_request["states"]
+            for state_id in list_states:
+                state = storage.get("State", state_id)
                 if state:
-                    places.update(state.places)
+                    list_cities = state.cities
+                    for city in list_cities:
+                        list_places = city.places
+                        for place in list_places:
+                            list_obj.append(place.to_dict())
 
-        if cities:
-            for city_id in cities:
-                city = storage.get(City, city_id)
+        if "cities" in obj_request and len(obj_request["cities"]) > 0:
+            list_cities = obj_request["cities"]
+            for city_id in list_cities:
+                city = storage.get("City", city_id)
                 if city:
-                    places.update(city.places)
-
-        if not states and not cities:
-            places = storage.all(Place).values()
-
-        if amenities:
-            amenities = set(amenities)
-            places = [place for place in places if \
-                      amenities.issubset(place.amenities)]
-
-    places_list = [place.to_dict() for place in places]
-    return jsonify(places_list)
+                    list_places = city.places
+                    for place in list_places:
+                        list_obj.append(place.to_dict())
+        return jsonify(list_obj)
