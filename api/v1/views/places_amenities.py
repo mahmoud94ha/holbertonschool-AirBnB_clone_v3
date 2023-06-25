@@ -6,10 +6,12 @@ from api.v1.views import app_views
 from flask import abort, jsonify, request
 from models import storage
 from os import environ
+from flasgger import swag_from
 stype = environ.get('HBNB_TYPE_STORAGE')
 
 
 @app_views.route('/places/<place_id>/amenities', methods=['GET'])
+@swag_from("../swaggerdocs/places_amenities/get.yml")
 def amenities_per_place(place_id=None):
     """amenities_per_place"""
 
@@ -33,6 +35,8 @@ def amenities_per_place(place_id=None):
 
 @app_views.route('/places/<place_id>/amenities/<amenity_id>',
                  methods=['DELETE', 'POST'])
+@swag_from("../swaggerdocs/places_amenities/post.yml", methods=["POST"])
+@swag_from("../swaggerdocs/places_amenities/delete.yml", methods=["DELETE"])
 def amenity_to_place(place_id=None, amenity_id=None):
     """amenity_to_place"""
 

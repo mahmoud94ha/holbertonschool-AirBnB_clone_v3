@@ -11,15 +11,18 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+from flasgger import swag_from
 
 
 @app_views.route('/status', methods=['GET'], strict_slashes=False)
+@swag_from("../swaggerdocs/status/status.yml")
 def get_status():
     """get status"""
     return jsonify({"status": "OK"})
 
 
 @app_views.route('/stats')
+@swag_from("../swaggerdocs/stats/stats.yml")
 def show_stats():
     """returns the count for all objects"""
     all_counts = {
